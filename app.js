@@ -2,6 +2,7 @@ import cors from "cors";
 import express from "express";
 import { json } from "body-parser";
 import homeRouter from "./routes/home";
+import familyRouter from "./routes/family";
 import { verifyToken } from "./firebase/middlewares";
 
 // EXPRESS APP
@@ -19,6 +20,7 @@ app.use(verifyToken);
 
 // API ROUTES WITH AUTHENTICATION
 app.use("/api/home", homeRouter);
+app.use("/api/family", familyRouter);
 
 // SERVER
 const port = process.env.PORT || 8000; // Use environment variable or default port

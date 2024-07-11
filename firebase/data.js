@@ -1,11 +1,21 @@
-import { firestore } from "./admin";
+import admin from "./admin";
 import moment from "moment";
 
 // FIRESTORE DATABASE INSTANCE
-const db = firestore();
+const db = admin.firestore();
 
 // FAMILY FUNCTIONS
-async function getFamilyList(homeID) {
+async function getFamilyList(homeID, user) {
+  // CHECK AUTHENTICITY
+  const home = db
+    .collection("home")
+    .doc(homeID)
+    .get()
+    .then((snapshot) => ({ id: snapshot.id, ...snapshot.data() }));
+
+  if ((await getHomeList(user)).indexOf(home) === -1)
+    throw new Error("Unauthorized");
+
   let familyList = [];
 
   await db
@@ -34,7 +44,9 @@ async function getFamilyListWithUser(user) {
 }
 
 async function addFamily(home, user) {
-  await db.collection("family").add({ home, user });
+  return (
+    await (await db.collection("family").add({ home, user })).get()
+  ).data();
 }
 
 async function removeFamily(familyID) {
