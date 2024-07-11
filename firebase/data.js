@@ -1,4 +1,5 @@
 const admin = require("./admin");
+const moment = require("moment");
 
 // FIRESTORE DATABASE INSTANCE
 const db = admin.firestore();
@@ -80,6 +81,91 @@ async function removeHome(homeID) {
   await db.collection("home").doc(homeID).delete();
 }
 
+// DATA FUNCTIONS
+async function getData(homeID, filterDate = []) {
+  let allData = [];
+
+  if (filterDate.length === 0) {
+    // ALL DATA
+    db.collection("clock")
+      .where("home", "==", homeID)
+      .get()
+      .then((snapshot) =>
+        snapshot.forEach((data) =>
+          allData.push({
+            id: data.id,
+            clockIn: new Date(data.data().clockIn.seconds * 1000),
+            clockOut: new Date(data.data().clockOut.seconds * 1000),
+            home: data.data().home,
+            notes: data.data().notes,
+          })
+        )
+      );
+  } else {
+    // FILTER BY DATE
+    const dateGreater = moment(filterDate[0]).hour(0).minute(0).toDate();
+    const dateLesser = moment(filterDate[filterDate.length - 1])
+      .hour(23)
+      .minute(59)
+      .toDate();
+
+    db.collection("clock")
+      .where("home", "==", homeID)
+      .where("clockIn", ">=", dateGreater)
+      .where("clockOut", "<=", dateLesser)
+      .get()
+      .then((snapshot) =>
+        snapshot.forEach((data) =>
+          allData.push({
+            id: data.id,
+            clockIn: new Date(data.data().clockIn.seconds * 1000),
+            clockOut: new Date(data.data().clockOut.seconds * 1000),
+            home: data.data().home,
+            notes: data.data().notes,
+          })
+        )
+      );
+  }
+
+  return allData;
+}
+
+async function dataExists(homeID, date) {
+  try {
+    const dateGreater = moment(date).hour(0).minute(0).toDate();
+    const dateLesser = moment(date).hour(23).minute(59).toDate();
+
+    const clockData = await db
+      .collection("clock")
+      .where("home", "==", homeID)
+      .where("clockIn", ">=", dateGreater)
+      .where("clockOut", "<=", dateLesser)
+      .get();
+
+    return clockData.empty;
+  } catch (error) {
+    console.log("ERROR", error);
+  }
+
+  return false;
+}
+
+async function setData(data) {
+  if (await dataExists(data.home, data.clockIn)) {
+    throw new Error("The log for that day already exists");
+  }
+
+  await db.collection("clock").add(data);
+}
+
+async function updateData(dataID, data) {
+  await db.collection("clock").doc(dataID).update(data);
+}
+
+async function removeData(dataID) {
+  await db.collection("clock").doc(dataID).delete();
+}
+
 module.exports = {
   // FAMILY
   getFamilyList,
@@ -92,4 +178,11 @@ module.exports = {
   addHome,
   setHome,
   removeHome,
+
+  // DATA
+  getData,
+  dataExists,
+  setData,
+  updateData,
+  removeData,
 };
