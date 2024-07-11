@@ -1,8 +1,8 @@
-const admin = require("./admin");
-const moment = require("moment");
+import { firestore } from "./admin";
+import moment from "moment";
 
 // FIRESTORE DATABASE INSTANCE
-const db = admin.firestore();
+const db = firestore();
 
 // FAMILY FUNCTIONS
 async function getFamilyList(homeID) {
@@ -56,16 +56,49 @@ async function getHomeList(user) {
   return homeList;
 }
 
+async function getHome(homeID, user) {
+  const home = db
+    .collection("home")
+    .doc(homeID)
+    .get()
+    .then((snapshot) => snapshot.exists)
+    .then((snapshot) => ({ id: snapshot.id, ...snapshot.data() }));
+
+  if ((await getHomeList(user)).indexOf(home) === -1)
+    throw new Error("Unauthorized");
+
+  return home;
+}
+
 async function addHome(home, user) {
   const newHome = await db.collection("home").add(home);
   await addFamily(newHome, user);
+
+  return newHome;
 }
 
-async function setHome(homeID, data) {
-  await db.collection("home").doc(homeID).update(data);
+async function setHome(homeID, data, user) {
+  const homeQuery = db.collection("home").doc(homeID);
+
+  const home = await homeQuery
+    .get()
+    .then((snapshot) => ({ id: snapshot.id, ...snapshot.data() }));
+  if ((await getHomeList(user)).indexOf(home) === -1)
+    throw new Error("Unauthorized");
+
+  await homeQuery.update(data);
 }
 
-async function removeHome(homeID) {
+async function removeHome(homeID, user) {
+  // CHECK AUTHENTICITY
+  const homeQuery = db.collection("home").doc(homeID);
+
+  const home = await homeQuery
+    .get()
+    .then((snapshot) => ({ id: snapshot.id, ...snapshot.data() }));
+  if ((await getHomeList(user)).indexOf(home) === -1)
+    throw new Error("Unauthorized");
+
   // REMOVE ALL FAMILY
   (await getFamilyList(homeID)).forEach(async (family) => {
     try {
@@ -76,9 +109,10 @@ async function removeHome(homeID) {
   });
 
   // REMOVE ALL DATA
+  (await getData(homeID)).forEach(async (data) => await removeData(data.id));
 
   // REMOVE HOME
-  await db.collection("home").doc(homeID).delete();
+  await homeQuery.delete();
 }
 
 // DATA FUNCTIONS
@@ -166,7 +200,7 @@ async function removeData(dataID) {
   await db.collection("clock").doc(dataID).delete();
 }
 
-module.exports = {
+export default {
   // FAMILY
   getFamilyList,
   getFamilyListWithUser,
@@ -175,6 +209,7 @@ module.exports = {
 
   // HOME
   getHomeList,
+  getHome,
   addHome,
   setHome,
   removeHome,
