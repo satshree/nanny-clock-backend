@@ -1,4 +1,4 @@
-const admin = require("./admin");
+import admin from "./admin";
 
 const verifyToken = async (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -19,4 +19,4 @@ const verifyToken = async (req, res, next) => {
   }
 };
 
-module.exports = { verifyToken };
+export default { verifyToken };
