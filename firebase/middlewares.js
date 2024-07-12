@@ -1,6 +1,8 @@
 import admin from "./admin";
 
-const verifyToken = async (req, res, next) => {
+// const db = admin.firestore();
+
+export async function verifyToken(req, res, next) {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -17,6 +19,15 @@ const verifyToken = async (req, res, next) => {
     console.log("ERR", error);
     return res.status(403).send("Invalid or expired token");
   }
-};
+}
 
-export default { verifyToken };
+// export async function checkAuthenticityWithHome(req, res, next) {
+//   const home = db
+//     .collection("home")
+//     .doc(req.homeID)
+//     .get()
+//     .then((snapshot) => ({ id: snapshot.id, ...snapshot.data() }));
+
+//   if ((await getHomeList(user)).indexOf(home) === -1)
+//     throw new Error("Unauthorized");
+// }

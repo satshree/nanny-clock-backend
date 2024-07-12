@@ -5,7 +5,7 @@ import moment from "moment";
 const db = admin.firestore();
 
 // FAMILY FUNCTIONS
-async function getFamilyList(homeID, user) {
+export async function getFamilyList(homeID, user) {
   // CHECK AUTHENTICITY
   const home = db
     .collection("home")
@@ -29,7 +29,7 @@ async function getFamilyList(homeID, user) {
   return familyList;
 }
 
-async function getFamilyListWithUser(user) {
+export async function getFamilyListWithUser(user) {
   let familyList = [];
 
   await db
@@ -43,18 +43,18 @@ async function getFamilyListWithUser(user) {
   return familyList;
 }
 
-async function addFamily(home, user) {
+export async function addFamily(home, user) {
   return (
     await (await db.collection("family").add({ home, user })).get()
   ).data();
 }
 
-async function removeFamily(familyID) {
+export async function removeFamily(familyID) {
   await db.collection("family").doc(familyID).delete();
 }
 
 // HOME FUNCTIONS
-async function getHomeList(user) {
+export async function getHomeList(user) {
   const familyList = await getFamilyList(user);
 
   const homeRefs = familyList.map((family) =>
@@ -68,7 +68,7 @@ async function getHomeList(user) {
   return homeList;
 }
 
-async function getHome(homeID, user) {
+export async function getHome(homeID, user) {
   const home = db
     .collection("home")
     .doc(homeID)
@@ -82,14 +82,14 @@ async function getHome(homeID, user) {
   return home;
 }
 
-async function addHome(home, user) {
+export async function addHome(home, user) {
   const newHome = await db.collection("home").add(home);
   await addFamily(newHome, user);
 
-  return newHome;
+  return (await newHome.get()).data();
 }
 
-async function setHome(homeID, data, user) {
+export async function setHome(homeID, data, user) {
   const homeQuery = db.collection("home").doc(homeID);
 
   const home = await homeQuery
@@ -101,7 +101,7 @@ async function setHome(homeID, data, user) {
   await homeQuery.update(data);
 }
 
-async function removeHome(homeID, user) {
+export async function removeHome(homeID, user) {
   // CHECK AUTHENTICITY
   const homeQuery = db.collection("home").doc(homeID);
 
@@ -128,7 +128,7 @@ async function removeHome(homeID, user) {
 }
 
 // DATA FUNCTIONS
-async function getData(homeID, filterDate = []) {
+export async function getData(homeID, filterDate = []) {
   let allData = [];
 
   if (filterDate.length === 0) {
@@ -176,7 +176,11 @@ async function getData(homeID, filterDate = []) {
   return allData;
 }
 
-async function dataExists(homeID, date) {
+export async function getDataWithID(dataID) {
+  return (await db.collection("clock").doc(dataID).get()).data();
+}
+
+export async function dataExists(homeID, date) {
   try {
     const dateGreater = moment(date).hour(0).minute(0).toDate();
     const dateLesser = moment(date).hour(23).minute(59).toDate();
@@ -196,40 +200,19 @@ async function dataExists(homeID, date) {
   return false;
 }
 
-async function setData(data) {
+export async function setData(data) {
   if (await dataExists(data.home, data.clockIn)) {
     throw new Error("The log for that day already exists");
   }
 
-  await db.collection("clock").add(data);
+  const newData = await db.collection("clock").add(data);
+  return (await newData.get()).data();
 }
 
-async function updateData(dataID, data) {
+export async function updateData(dataID, data) {
   await db.collection("clock").doc(dataID).update(data);
 }
 
-async function removeData(dataID) {
+export async function removeData(dataID) {
   await db.collection("clock").doc(dataID).delete();
 }
-
-export default {
-  // FAMILY
-  getFamilyList,
-  getFamilyListWithUser,
-  addFamily,
-  removeFamily,
-
-  // HOME
-  getHomeList,
-  getHome,
-  addHome,
-  setHome,
-  removeHome,
-
-  // DATA
-  getData,
-  dataExists,
-  setData,
-  updateData,
-  removeData,
-};
