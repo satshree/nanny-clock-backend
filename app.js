@@ -1,14 +1,13 @@
-import cors from "cors";
-import express from "express";
-import { json } from "body-parser";
-import homeRouter from "./routes/home";
-import dataRouter from "./routes/data";
-import familyRouter from "./routes/family";
-import { verifyToken } from "./firebase/middlewares";
+const cors = require("cors");
+const express = require("express");
+const homeRouter = require("./routes/home");
+const dataRouter = require("./routes/data");
+const familyRouter = require("./routes/family");
+const { verifyToken } = require("./middlewares");
 
 // EXPRESS APP
 const app = express();
-app.use(json()); // Parse JSON requests
+app.use(express.json()); // Parse JSON requests
 
 // CORS
 app.use(cors());

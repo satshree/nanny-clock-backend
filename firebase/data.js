@@ -1,11 +1,11 @@
-import admin from "./admin";
-import moment from "moment";
+const admin = require("./admin");
+const moment = require("moment");
 
 // FIRESTORE DATABASE INSTANCE
 const db = admin.firestore();
 
 // FAMILY FUNCTIONS
-export async function getFamilyList(homeID, user) {
+async function getFamilyList(homeID, user) {
   // CHECK AUTHENTICITY
   const home = db
     .collection("home")
@@ -29,7 +29,7 @@ export async function getFamilyList(homeID, user) {
   return familyList;
 }
 
-export async function getFamilyListWithUser(user) {
+async function getFamilyListWithUser(user) {
   let familyList = [];
 
   await db
@@ -43,18 +43,18 @@ export async function getFamilyListWithUser(user) {
   return familyList;
 }
 
-export async function addFamily(home, user) {
+async function addFamily(home, user) {
   return (
     await (await db.collection("family").add({ home, user })).get()
   ).data();
 }
 
-export async function removeFamily(familyID) {
+async function removeFamily(familyID) {
   await db.collection("family").doc(familyID).delete();
 }
 
 // HOME FUNCTIONS
-export async function getHomeList(user) {
+async function getHomeList(user) {
   const familyList = await getFamilyList(user);
 
   const homeRefs = familyList.map((family) =>
@@ -68,7 +68,7 @@ export async function getHomeList(user) {
   return homeList;
 }
 
-export async function getHome(homeID, user) {
+async function getHome(homeID, user) {
   const home = db
     .collection("home")
     .doc(homeID)
@@ -82,14 +82,14 @@ export async function getHome(homeID, user) {
   return home;
 }
 
-export async function addHome(home, user) {
+async function addHome(home, user) {
   const newHome = await db.collection("home").add(home);
   await addFamily(newHome, user);
 
   return (await newHome.get()).data();
 }
 
-export async function setHome(homeID, data, user) {
+async function setHome(homeID, data, user) {
   const homeQuery = db.collection("home").doc(homeID);
 
   const home = await homeQuery
@@ -101,7 +101,7 @@ export async function setHome(homeID, data, user) {
   await homeQuery.update(data);
 }
 
-export async function removeHome(homeID, user) {
+async function removeHome(homeID, user) {
   // CHECK AUTHENTICITY
   const homeQuery = db.collection("home").doc(homeID);
 
@@ -128,15 +128,16 @@ export async function removeHome(homeID, user) {
 }
 
 // DATA FUNCTIONS
-export async function getData(homeID, filterDate = []) {
+async function getData(homeID, filterDate = []) {
   let allData = [];
 
   if (filterDate.length === 0) {
     // ALL DATA
-    db.collection("clock")
+    await db
+      .collection("clock")
       .where("home", "==", homeID)
       .get()
-      .then((snapshot) =>
+      .then((snapshot) => {
         snapshot.forEach((data) =>
           allData.push({
             id: data.id,
@@ -145,8 +146,8 @@ export async function getData(homeID, filterDate = []) {
             home: data.data().home,
             notes: data.data().notes,
           })
-        )
-      );
+        );
+      });
   } else {
     // FILTER BY DATE
     const dateGreater = moment(filterDate[0]).hour(0).minute(0).toDate();
@@ -176,11 +177,11 @@ export async function getData(homeID, filterDate = []) {
   return allData;
 }
 
-export async function getDataWithID(dataID) {
+async function getDataWithID(dataID) {
   return (await db.collection("clock").doc(dataID).get()).data();
 }
 
-export async function dataExists(homeID, date) {
+async function dataExists(homeID, date) {
   try {
     const dateGreater = moment(date).hour(0).minute(0).toDate();
     const dateLesser = moment(date).hour(23).minute(59).toDate();
@@ -200,7 +201,7 @@ export async function dataExists(homeID, date) {
   return false;
 }
 
-export async function setData(data) {
+async function setData(data) {
   if (await dataExists(data.home, data.clockIn)) {
     throw new Error("The log for that day already exists");
   }
@@ -209,10 +210,33 @@ export async function setData(data) {
   return (await newData.get()).data();
 }
 
-export async function updateData(dataID, data) {
+async function updateData(dataID, data) {
   await db.collection("clock").doc(dataID).update(data);
 }
 
-export async function removeData(dataID) {
+async function removeData(dataID) {
   await db.collection("clock").doc(dataID).delete();
 }
+
+module.exports = {
+  // FAMILY
+  getFamilyList,
+  getFamilyListWithUser,
+  addFamily,
+  removeFamily,
+
+  // HOME
+  getHomeList,
+  getHome,
+  addHome,
+  setHome,
+  removeHome,
+
+  // DATA
+  getData,
+  getDataWithID,
+  dataExists,
+  setData,
+  updateData,
+  removeData,
+};

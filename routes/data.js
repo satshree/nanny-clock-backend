@@ -1,14 +1,8 @@
-import { Router } from "express";
-import {
-  getData,
-  getDataWithID,
-  setData,
-  updateData,
-  removeData,
-} from "../firebase/data";
+const express = require("express");
+const firestoreData = require("../firebase/data");
 
 // ROUTER INSTANCE
-const router = Router();
+const router = express.Router();
 
 // DATA ROUTES
 router.route("/get/:id").get(async (req, res) => {
@@ -17,7 +11,8 @@ router.route("/get/:id").get(async (req, res) => {
       ? [req.query.firstDay, req.query.lastDay]
       : [];
 
-  res.json(await getData(req.params.id, filterDate));
+  const allData = await firestoreData.getData(req.params.id, filterDate);
+  res.json(allData);
 });
 
 router.route("/add/:id").post(async (req, res) => {
@@ -28,7 +23,7 @@ router.route("/add/:id").post(async (req, res) => {
     notes: req.body.notes,
   };
 
-  res.json(await setData(data));
+  res.json(await firestoreData.setData(data));
 });
 
 router
@@ -38,13 +33,13 @@ router
       notes: req.body.notes,
     };
 
-    await updateData(req.params.id, data);
+    await firestoreData.updateData(req.params.id, data);
     const updatedData = getDataWithID(req.params.id);
 
     res.json(updatedData);
   })
   .delete(async (req, res) => {
-    res.json(await removeData(req.params.id));
+    res.json(await firestoreData.removeData(req.params.id));
   });
 
-export default router;
+module.exports = router;

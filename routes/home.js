@@ -1,14 +1,8 @@
-import { Router } from "express";
-import {
-  getHomeList,
-  addHome,
-  getHome,
-  setHome,
-  removeHome,
-} from "../firebase/data";
+const express = require("express");
+const firestoreData = require("../firebase/data");
 
 // ROUTER INSTANCE
-const router = Router();
+const router = express.Router();
 
 // HOME ROUTE
 router
@@ -21,7 +15,7 @@ router
       hourlyRate: parseInt(req.body.hourlyRate),
     };
 
-    const newHome = await addHome(homeData, req.user);
+    const newHome = await firestoreData.addHome(homeData, req.user);
 
     res.json({ message: "New home added", data: newHome });
   });
@@ -29,7 +23,7 @@ router
 router
   .route("/:id")
   .get(async (req, res) => {
-    res.json(await getHome(req.params.id, req.user));
+    res.json(await firestoreData.getHome(req.params.id, req.user));
   })
   .put(async (req, res) => {
     const homeData = {
@@ -38,14 +32,14 @@ router
       hourlyRate: parseInt(req.body.hourlyRate),
     };
 
-    await setHome(req.params.id, homeData);
-    const updatedHome = await getHome(req.params.id, req.user);
+    await firestoreData.setHome(req.params.id, homeData);
+    const updatedHome = await firestoreData.getHome(req.params.id, req.user);
 
     res.json({ message: "Home information updated", data: updatedHome });
   })
   .delete(async (req, res) => {
-    await removeHome(req.params.id, req.user);
+    await firestoreData.removeHome(req.params.id, req.user);
     res.json({ message: "Home deleted" });
   });
 
-export default router;
+module.exports = router;

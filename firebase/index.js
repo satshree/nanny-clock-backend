@@ -1,3 +1,3 @@
-import admin from "./admin";
+const admin = require("./admin");
 
-export default admin;
+module.exports = admin;
