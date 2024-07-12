@@ -2,6 +2,7 @@ import cors from "cors";
 import express from "express";
 import { json } from "body-parser";
 import homeRouter from "./routes/home";
+import dataRouter from "./routes/data";
 import familyRouter from "./routes/family";
 import { verifyToken } from "./firebase/middlewares";
 
@@ -20,6 +21,7 @@ app.use(verifyToken);
 
 // API ROUTES WITH AUTHENTICATION
 app.use("/api/home", homeRouter);
+app.use("/api/data", dataRouter);
 app.use("/api/family", familyRouter);
 
 // SERVER
