@@ -12,7 +12,7 @@ const {
  * @param {*} res
  */
 async function fetchHome(req, res) {
-  res.json(await getHome(req.params.id, req.user));
+  res.json(await getHome(req.params.id));
 }
 
 /**
