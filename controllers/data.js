@@ -6,6 +6,15 @@ const {
   removeData,
 } = require("../firebase/data");
 
+/**
+ * DATA CONTROLLERS
+ * */
+
+/**
+ * Return all clock in - clock out data
+ * @param {*} req
+ * @param {*} res
+ */
 async function getAllData(req, res) {
   const filterDate =
     req.query.firstDay ?? req.query.lastDay
@@ -15,6 +24,11 @@ async function getAllData(req, res) {
   res.json(await getData(req.params.id, filterDate));
 }
 
+/**
+ * Create clock in - clock out data
+ * @param {*} req
+ * @param {*} res
+ */
 async function setData(req, res) {
   const data = {
     home: req.body.home,
@@ -26,6 +40,11 @@ async function setData(req, res) {
   res.json(await setData(data));
 }
 
+/**
+ * Update data
+ * @param {*} req
+ * @param {*} res
+ */
 async function updateData(req, res) {
   const data = {
     notes: req.body.notes,
@@ -37,6 +56,11 @@ async function updateData(req, res) {
   res.json(updatedData);
 }
 
+/**
+ * Remove data
+ * @param {*} req
+ * @param {*} res
+ */
 async function deleteData(req, res) {
   res.json(await removeData(req.params.id));
 }
