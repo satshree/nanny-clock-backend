@@ -29,7 +29,7 @@ async function getAllData(req, res) {
  * @param {*} req
  * @param {*} res
  */
-async function setData(req, res) {
+async function createData(req, res) {
   const data = {
     home: req.body.home,
     clockIn: req.body.clockIn,
@@ -45,7 +45,7 @@ async function setData(req, res) {
  * @param {*} req
  * @param {*} res
  */
-async function updateData(req, res) {
+async function editData(req, res) {
   const data = {
     notes: req.body.notes,
   };
@@ -65,4 +65,4 @@ async function deleteData(req, res) {
   res.json(await removeData(req.params.id));
 }
 
-module.exports = { getAllData, setData, updateData, deleteData };
+module.exports = { getAllData, createData, editData, deleteData };

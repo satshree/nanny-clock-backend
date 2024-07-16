@@ -18,7 +18,7 @@ async function getFamily(req, res) {
  * @param {*} req
  * @param {*} res
  */
-async function addFamily(req, res) {
+async function addToFamily(req, res) {
   const home = req.body.home;
   const user = req.user;
 
@@ -32,10 +32,10 @@ async function addFamily(req, res) {
  * @param {*} req
  * @param {*} res
  */
-async function removeFamily(req, res) {
+async function deleteFamily(req, res) {
   await removeFamily(req.params.id);
 
   res.json({ message: "Family member removed" });
 }
 
-module.exports = { getFamily, addFamily, removeFamily };
+module.exports = { getFamily, addToFamily, deleteFamily };

@@ -1,8 +1,8 @@
 const express = require("express");
 const {
   getAllData,
-  setData,
-  updateData,
+  createData,
+  editData,
   deleteData,
 } = require("../controllers/data");
 
@@ -12,8 +12,8 @@ const router = express.Router();
 // DATA ROUTES
 router.route("/get/:id").get(getAllData);
 
-router.route("/add/:id").post(setData);
+router.route("/add/:id").post(createData);
 
-router.route("/set/:id").post(updateData).delete(deleteData);
+router.route("/set/:id").post(editData).delete(deleteData);
 
 module.exports = router;
