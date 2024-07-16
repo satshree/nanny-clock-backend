@@ -55,7 +55,7 @@ async function removeFamily(familyID) {
 
 // HOME FUNCTIONS
 async function getHomeList(user) {
-  const familyList = await getFamilyList(user);
+  const familyList = await getFamilyListWithUser(user);
 
   const homeRefs = familyList.map((family) =>
     db.collection("home").doc(family.home)
@@ -68,16 +68,12 @@ async function getHomeList(user) {
   return homeList;
 }
 
-async function getHome(homeID, user) {
+async function getHome(homeID) {
   const home = db
     .collection("home")
     .doc(homeID)
     .get()
-    .then((snapshot) => snapshot.exists)
     .then((snapshot) => ({ id: snapshot.id, ...snapshot.data() }));
-
-  if ((await getHomeList(user)).indexOf(home) === -1)
-    throw new Error("Unauthorized");
 
   return home;
 }
@@ -136,6 +132,7 @@ async function getData(homeID, filterDate = []) {
     await db
       .collection("clock")
       .where("home", "==", homeID)
+      .orderBy("clockIn")
       .get()
       .then((snapshot) => {
         snapshot.forEach((data) =>
@@ -160,6 +157,7 @@ async function getData(homeID, filterDate = []) {
       .where("home", "==", homeID)
       .where("clockIn", ">=", dateGreater)
       .where("clockOut", "<=", dateLesser)
+      .orderBy("clockIn")
       .get()
       .then((snapshot) =>
         snapshot.forEach((data) =>
