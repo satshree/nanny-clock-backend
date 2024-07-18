@@ -10,7 +10,7 @@ const { getFamilyList, addFamily, removeFamily } = require("../firebase/data");
  * @param {*} res
  */
 async function getFamily(req, res) {
-  res.json(await getFamilyList(req.params.id, req.user));
+  res.json(await getFamilyList(req.params.id));
 }
 
 /**

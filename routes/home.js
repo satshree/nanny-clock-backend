@@ -1,5 +1,5 @@
 const express = require("express");
-const firestoreData = require("../firebase/data");
+const { checkAuthenticityWithHome } = require("../middlewares/authenticity");
 const {
   fetchHome,
   fetchHomeList,
@@ -14,6 +14,10 @@ const router = express.Router();
 // HOME ROUTE
 router.route("/").get(fetchHomeList).post(createHome);
 
-router.route("/:id").get(fetchHome).put(updateHome).delete(deleteHome);
+router
+  .route("/:id")
+  .get(checkAuthenticityWithHome, fetchHome)
+  .put(checkAuthenticityWithHome, updateHome)
+  .delete(checkAuthenticityWithHome, deleteHome);
 
 module.exports = router;
