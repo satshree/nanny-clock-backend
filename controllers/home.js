@@ -7,6 +7,10 @@ const {
 } = require("../firebase/data");
 
 /**
+ * HOME CONTROLLERS
+ */
+
+/**
  * Return home with home ID
  * @param {*} req
  * @param {*} res
