@@ -5,17 +5,7 @@ const moment = require("moment");
 const db = admin.firestore();
 
 // FAMILY FUNCTIONS
-async function getFamilyList(homeID, user) {
-  // CHECK AUTHENTICITY
-  const home = db
-    .collection("home")
-    .doc(homeID)
-    .get()
-    .then((snapshot) => ({ id: snapshot.id, ...snapshot.data() }));
-
-  if ((await getHomeList(user)).indexOf(home) === -1)
-    throw new Error("Unauthorized");
-
+async function getFamilyList(homeID) {
   let familyList = [];
 
   await db
@@ -85,28 +75,11 @@ async function addHome(home, user) {
   return (await newHome.get()).data();
 }
 
-async function setHome(homeID, data, user) {
-  const homeQuery = db.collection("home").doc(homeID);
-
-  const home = await homeQuery
-    .get()
-    .then((snapshot) => ({ id: snapshot.id, ...snapshot.data() }));
-  if ((await getHomeList(user)).indexOf(home) === -1)
-    throw new Error("Unauthorized");
-
-  await homeQuery.update(data);
+async function setHome(homeID, data) {
+  await db.collection("home").doc(homeID).update(data);
 }
 
-async function removeHome(homeID, user) {
-  // CHECK AUTHENTICITY
-  const homeQuery = db.collection("home").doc(homeID);
-
-  const home = await homeQuery
-    .get()
-    .then((snapshot) => ({ id: snapshot.id, ...snapshot.data() }));
-  if ((await getHomeList(user)).indexOf(home) === -1)
-    throw new Error("Unauthorized");
-
+async function removeHome(homeID) {
   // REMOVE ALL FAMILY
   (await getFamilyList(homeID)).forEach(async (family) => {
     try {
@@ -120,7 +93,7 @@ async function removeHome(homeID, user) {
   (await getData(homeID)).forEach(async (data) => await removeData(data.id));
 
   // REMOVE HOME
-  await homeQuery.delete();
+  await db.collection("home").doc(homeID).delete();
 }
 
 // DATA FUNCTIONS

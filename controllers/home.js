@@ -58,7 +58,7 @@ async function updateHome(req, res) {
   };
 
   await setHome(req.params.id, homeData);
-  const updatedHome = await getHome(req.params.id, req.user);
+  const updatedHome = await getHome(req.params.id);
 
   res.json({ message: "Home information updated", data: updatedHome });
 }
@@ -69,7 +69,7 @@ async function updateHome(req, res) {
  * @param {*} res
  */
 async function deleteHome(req, res) {
-  await removeHome(req.params.id, req.user);
+  await removeHome(req.params.id);
   res.json({ message: "Home deleted" });
 }
 

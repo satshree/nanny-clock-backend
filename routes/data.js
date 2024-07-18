@@ -1,5 +1,9 @@
 const express = require("express");
 const {
+  checkAuthenticityWithData,
+  checkAuthenticityWithHome,
+} = require("../middlewares/authenticity");
+const {
   getAllData,
   createData,
   editData,
@@ -10,10 +14,13 @@ const {
 const router = express.Router();
 
 // DATA ROUTES
-router.route("/get/:id").get(getAllData);
+router.route("/get/:id").get(checkAuthenticityWithHome, getAllData);
 
-router.route("/add/:id").post(createData);
+router.route("/add/:id").post(checkAuthenticityWithHome, createData);
 
-router.route("/set/:id").post(editData).delete(deleteData);
+router
+  .route("/set/:id")
+  .post(checkAuthenticityWithData, editData)
+  .delete(checkAuthenticityWithData, deleteData);
 
 module.exports = router;
