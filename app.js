@@ -7,6 +7,7 @@ const dataRouter = require("./routes/data");
 const familyRouter = require("./routes/family");
 const analyticsRouter = require("./routes/analytics");
 const invoiceRouter = require("./routes/invoice");
+const settingsRouter = require("./routes/settings");
 const { verifyToken } = require("./middlewares");
 
 // EXPRESS APP
@@ -28,6 +29,7 @@ app.use("/api/data", dataRouter);
 app.use("/api/family", familyRouter);
 app.use("/api/analytics", analyticsRouter);
 app.use("/api/invoice", invoiceRouter);
+app.use("/api/settings", settingsRouter);
 
 // SERVER
 const port = process.env.PORT || 8000; // Use environment variable or default port
