@@ -70,7 +70,12 @@ async function getHome(homeID) {
 
 async function addHome(home, user) {
   const newHome = await db.collection("home").add(home);
-  await addFamily(newHome, user);
+  await addFamily(newHome.id, user);
+  await addSettings(newHome.id, {
+    autoClockEnd: "",
+    autoClockStart: "",
+    autoDailyClock: [],
+  });
 
   return (await newHome.get()).data();
 }
@@ -89,11 +94,61 @@ async function removeHome(homeID) {
     }
   });
 
+  // REMOVE SETTINGS
+  await removeSettings(homeID);
+
   // REMOVE ALL DATA
   (await getData(homeID)).forEach(async (data) => await removeData(data.id));
 
   // REMOVE HOME
   await db.collection("home").doc(homeID).delete();
+}
+
+// SETTINGS FUNCTIONS
+async function getSettings(homeID) {
+  let settings = {};
+
+  await db
+    .collection("homeSettings")
+    .where("home", "==", homeID)
+    .get()
+    .then((snapshot) =>
+      snapshot.forEach((s) => {
+        settings = { id: s.id, ...s.data() };
+      })
+    );
+
+  return settings;
+}
+
+async function addSettings(homeID, data) {
+  if (!!(await getSettings(homeID))) throw new Error("Settings already exists");
+
+  const settings = await db
+    .collection("homeSettings")
+    .add({ home: homeID, ...data });
+  return (await settings.get()).data();
+}
+
+async function setSettings(homeID, data) {
+  const settings = await db
+    .collection("homeSettings")
+    .where("home", "==", homeID)
+    .get();
+
+  const batch = db.batch();
+  settings.forEach((s) => batch.update(s.ref, { home: homeID, ...data }));
+  await batch.commit();
+}
+
+async function removeSettings(homeID) {
+  const settings = await db
+    .collection("homeSettings")
+    .where("home", "==", homeID)
+    .get();
+  const batch = db.batch();
+  settings.forEach((s) => batch.delete(s.ref));
+  await batch.commit();
 }
 
 // DATA FUNCTIONS
@@ -202,6 +257,12 @@ module.exports = {
   addHome,
   setHome,
   removeHome,
+
+  // SETTINGS
+  getSettings,
+  setSettings,
+  addSettings,
+  removeSettings,
 
   // DATA
   getData,
