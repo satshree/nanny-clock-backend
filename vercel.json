@@ -12,7 +12,7 @@
       "dest": "app.js"
     }
   ],
-  "cron": [
+  "crons": [
     {
       "path": "/api/cron/auto-clock/",
       "schedule": "0 0 * * *"
