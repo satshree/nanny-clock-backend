@@ -21,6 +21,9 @@ app.use(cors());
 // VIEW ENGINE
 app.set("view engine", "ejs");
 
+// API WITHOUT AUTHENTICATION
+app.use("/api/cron", cronRouter);
+
 // FIREBASE AUTHENTICATION
 app.use(verifyToken);
 
@@ -31,7 +34,6 @@ app.use("/api/family", familyRouter);
 app.use("/api/analytics", analyticsRouter);
 app.use("/api/invoice", invoiceRouter);
 app.use("/api/settings", settingsRouter);
-app.use("/api/cron", cronRouter);
 
 // SERVER
 const port = process.env.PORT || 8000; // Use environment variable or default port
