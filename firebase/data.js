@@ -219,7 +219,7 @@ async function dataExists(homeID, date) {
       .where("clockOut", "<=", dateLesser)
       .get();
 
-    return clockData.empty;
+    return !clockData.empty;
   } catch (error) {
     console.log("ERROR", error);
   }

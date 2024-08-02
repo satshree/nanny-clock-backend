@@ -8,7 +8,7 @@ const { setData } = require("../firebase/data");
 
 const db = admin.firestore();
 
-async function autoClockHomes() {
+async function autoClockHomes(req, res) {
   const allSettings = await db.collection("homeSettings").get();
 
   const currentDate = moment().format("YYYY-MM-DD");
@@ -23,8 +23,11 @@ async function autoClockHomes() {
   };
   const today = mapDays[moment().day()];
 
-  allSettings.forEach((settings) => {
+  allSettings.forEach(async (s) => {
+    const settings = s.data();
+
     if (
+      settings.autoDailyClock !== undefined &&
       settings.autoDailyClock.length !== 0 &&
       settings.autoDailyClock.indexOf(today) !== -1
     ) {
@@ -44,12 +47,23 @@ async function autoClockHomes() {
           clockOut: end,
         };
 
-        setData(data);
+        try {
+          await setData(data);
+        } catch (error) {
+          console.log("ERROR");
+          console.log("Home", settings.home);
+          console.log(error);
+        }
       } catch (err) {
         console.log("ERR", err);
       }
     }
   });
+
+  res.send(`<h1>NANNY CLOCK GLOBAL CRON TASK.</h1>
+    <br />
+    <small>Nothing major stuffs behind this endpoint.</small>
+    `);
 }
 
 module.exports = { autoClockHomes };
