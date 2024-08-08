@@ -9,6 +9,8 @@ const { setData } = require("../firebase/data");
 const db = admin.firestore();
 
 async function autoClockHomes(req, res) {
+  console.log("HERE AT CRON FUNCTION");
+
   const allSettings = await db.collection("homeSettings").get();
 
   const currentDate = moment().format("YYYY-MM-DD");
