@@ -37,10 +37,11 @@ async function sendMailAsHTML(to, subject, body) {
       console.log(
         `ERROR FROM SEND MAIL => ${JSON.stringify(err, undefined, 2)}`
       );
-    // else
-    //   console.log(
-    //     `LOG FROM SEND MAIL => ${JSON.stringify(info, undefined, 2)}`
-    //   );
+    else
+      console.log(
+        // `LOG FROM SEND MAIL => ${JSON.stringify(info, undefined, 2)}`
+        "Email Sent"
+      );
   });
 }
 
