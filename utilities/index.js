@@ -61,7 +61,7 @@ async function autoClockHomesUtility(verbose = true) {
         };
 
         logOutput("********");
-        logOutput(`Clock data => ${data}`);
+        logOutput(`Clock data => ${JSON.stringify(data, undefined, 2)}`);
 
         try {
           await setData(data);
