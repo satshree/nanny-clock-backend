@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const moment = require("moment");
+const moment = require("moment-timezone");
 const admin = require("../firebase/admin");
 const { setData } = require("../firebase/data");
 const { sendMailAsHTML } = require("./email");
@@ -55,11 +55,11 @@ async function autoClockHomesUtility(verbose = true) {
         const start = moment(
           `${currentDate} ${settings.autoClockStart}`,
           "YYYY-MM-DD hh:mm A"
-        );
+        ).tz("America/Chicago");
         const end = moment(
           `${currentDate} ${settings.autoClockEnd}`,
           "YYYY-MM-DD hh:mm A"
-        );
+        ).tz("America/Chicago");
 
         const data = {
           home: settings.home,
@@ -115,6 +115,9 @@ async function autoClockHomesUtility(verbose = true) {
     "[Nanny Clock] Daily auto clock in cron status",
     htmlToSend
   );
+
+  logOutput("Email Sent");
+  logOutput("********");
 }
 
 module.exports = { sleep, autoClockHomesUtility };
