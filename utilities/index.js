@@ -1,17 +1,23 @@
+const fs = require("fs");
+const path = require("path");
 const moment = require("moment");
 const admin = require("../firebase/admin");
 const { setData } = require("../firebase/data");
+const { sendMailAsHTML } = require("./email");
 
 /**
- * CRON CONTROLLERS
+ * UTILITIES
  */
 
 const db = admin.firestore();
+
+const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay));
 
 async function autoClockHomesUtility(verbose = true) {
   function logOutput(message) {
     if (verbose) console.log(message);
   }
+
   const allSettings = await db.collection("homeSettings").get();
 
   const currentDate = moment().format("YYYY-MM-DD");
@@ -31,8 +37,9 @@ async function autoClockHomesUtility(verbose = true) {
   logOutput(`Today => ${today}`);
 
   let counter = 0;
+  let emailHtmlStatus = "";
 
-  allSettings.forEach(async (s) => {
+  for (const s of allSettings.docs) {
     const settings = s.data();
 
     logOutput("********");
@@ -64,8 +71,20 @@ async function autoClockHomesUtility(verbose = true) {
         logOutput(`Clock data => ${JSON.stringify(data, undefined, 2)}`);
 
         try {
-          await setData(data);
+          const response = await setData(data);
           counter++;
+          emailHtmlStatus += `<tr>
+            <td>${counter}</td>
+            <td>${data.home}</td>
+            <td>${JSON.stringify(settings.autoDailyClock)}</td>
+            <td>${moment(data.clockIn).format("hh:mm A")}</td>
+            <td>${moment(data.clockOut).format("hh:mm A")}</td>
+            <td><small><pre>${JSON.stringify(
+              response,
+              undefined,
+              2
+            )}</pre></small></td>
+          </tr>`;
         } catch (error) {
           console.log("ERROR");
           console.log("Home", settings.home);
@@ -75,11 +94,27 @@ async function autoClockHomesUtility(verbose = true) {
         console.log("ERR", err);
       }
     }
-  });
+  }
 
   logOutput("********");
   logOutput(`Total auto clocked => ${counter}`);
   logOutput("********");
+
+  const htmlContent = await fs.promises.readFile(
+    path.join(__dirname, "..", "templates", "cronAutoClockStatusEmail.html"), // ./../templates/cronAutoClockStatusEmail.html
+    "utf-8"
+  );
+  const htmlToSend = htmlContent
+    .toString()
+    .replace(/{{date}}/g, `${currentDate}, ${moment().format("hh:mm A")}`)
+    .replace(/{{totalAutoClockedIn}}/g, counter)
+    .replace(/{{clockedList}}/g, emailHtmlStatus);
+
+  await sendMailAsHTML(
+    "satshree.shrestha@gmail.com",
+    "[Nanny Clock] Daily auto clock in cron status",
+    htmlToSend
+  );
 }
 
-module.exports = { autoClockHomesUtility };
+module.exports = { sleep, autoClockHomesUtility };
