@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const moment = require("moment-timezone");
+const moment = require("moment");
 const admin = require("../firebase/admin");
 const { setData } = require("../firebase/data");
 const { sendMailAsHTML } = require("./email");
@@ -33,7 +33,7 @@ async function autoClockHomesUtility(verbose = true) {
   const today = mapDays[moment().day()];
 
   logOutput("********");
-  logOutput(`Auto clocking homes for ${currentDate}`);
+  logOutput(`Auto clocking homes for ${moment().format()}`);
   logOutput(`Today => ${today}`);
 
   let counter = 0;
@@ -55,16 +55,24 @@ async function autoClockHomesUtility(verbose = true) {
         const start = moment(
           `${currentDate} ${settings.autoClockStart}`,
           "YYYY-MM-DD hh:mm A"
-        ).tz("America/Chicago");
+        )
+          // .tz("America/Chicago")
+          .toDate();
+        start.setHours(start.getHours() + 5); // fix for timezone issue
+
         const end = moment(
           `${currentDate} ${settings.autoClockEnd}`,
           "YYYY-MM-DD hh:mm A"
-        ).tz("America/Chicago");
+        )
+          // .tz("America/Chicago")
+          .toDate();
+        end.setHours(end.getHours() - 5); // fix for timezone issue
 
         const data = {
           home: settings.home,
           clockIn: start,
           clockOut: end,
+          notes: "",
         };
 
         logOutput("********");
