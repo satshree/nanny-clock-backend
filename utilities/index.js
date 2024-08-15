@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const moment = require("moment");
+const moment = require("moment-timezone");
 const admin = require("../firebase/admin");
 const { setData } = require("../firebase/data");
 const { sendMailAsHTML } = require("./email");
@@ -66,7 +66,7 @@ async function autoClockHomesUtility(verbose = true) {
         )
           // .tz("America/Chicago")
           .toDate();
-        end.setHours(end.getHours() - 5); // fix for timezone issue
+        end.setHours(end.getHours() + 5); // fix for timezone issue
 
         const data = {
           home: settings.home,
@@ -74,6 +74,8 @@ async function autoClockHomesUtility(verbose = true) {
           clockOut: end,
           notes: "",
         };
+
+        // logOutput(data);
 
         logOutput("********");
         logOutput(`Clock data => ${JSON.stringify(data, undefined, 2)}`);
@@ -108,24 +110,24 @@ async function autoClockHomesUtility(verbose = true) {
   logOutput(`Total auto clocked => ${counter}`);
   logOutput("********");
 
-  const htmlContent = await fs.promises.readFile(
-    path.join(__dirname, "..", "templates", "cronAutoClockStatusEmail.html"), // ./../templates/cronAutoClockStatusEmail.html
-    "utf-8"
-  );
-  const htmlToSend = htmlContent
-    .toString()
-    .replace(/{{date}}/g, `${currentDate}, ${moment().format("hh:mm A")}`)
-    .replace(/{{totalAutoClockedIn}}/g, counter)
-    .replace(/{{clockedList}}/g, emailHtmlStatus);
+  // const htmlContent = await fs.promises.readFile(
+  //   path.join(__dirname, "..", "templates", "cronAutoClockStatusEmail.html"), // ./../templates/cronAutoClockStatusEmail.html
+  //   "utf-8"
+  // );
+  // const htmlToSend = htmlContent
+  //   .toString()
+  //   .replace(/{{date}}/g, `${currentDate}, ${moment().format("hh:mm A")}`)
+  //   .replace(/{{totalAutoClockedIn}}/g, counter)
+  //   .replace(/{{clockedList}}/g, emailHtmlStatus);
 
-  await sendMailAsHTML(
-    "satshree.shrestha@gmail.com",
-    "[Nanny Clock] Daily auto clock in cron status",
-    htmlToSend
-  );
+  // await sendMailAsHTML(
+  //   "satshree.shrestha@gmail.com",
+  //   "[Nanny Clock] Daily auto clock in cron status",
+  //   htmlToSend
+  // );
 
-  logOutput("Email Sent");
-  logOutput("********");
+  // logOutput("Email Sent");
+  // logOutput("********");
 }
 
 module.exports = { sleep, autoClockHomesUtility };
