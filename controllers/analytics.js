@@ -62,7 +62,13 @@ async function getMonthlyDataNumbers(req, res) {
   // SET UP DATA
   let prevData = allData[0];
 
-  allData.forEach((data) => {
+  allData.forEach((data, index) => {
+    if (allData.length - 1 === index) {
+      // LAST DATA
+      const currentMonth = moment(data.clockIn).format("YYYY-MM");
+      monthlyData[currentMonth] = { totalHours, totalCost, totalDays };
+    }
+
     if (moment(prevData.clockIn).month() < moment(data.clockIn).month()) {
       // SET PREVIOUS MONTH DATA
       const prevMonth = moment(prevData.clockIn).format("YYYY-MM");
