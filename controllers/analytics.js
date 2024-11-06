@@ -118,7 +118,7 @@ async function getDailyDataNumbers(req, res) {
       .duration(moment(data.clockOut).diff(moment(data.clockIn))) // endtime.diff(starttime)
       .asHours();
 
-    dailyData[moment(data.clockIn).format("YYYY-MM-DD")] = {
+    dailyData[moment(data.clockIn).format("MM/DD/YYYY")] = {
       totalHour,
       totalCost: totalHour * home.hourlyRate,
     };
