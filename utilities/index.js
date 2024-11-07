@@ -58,7 +58,7 @@ async function autoClockHomesUtility(verbose = true) {
         )
           // .tz("America/Chicago")
           .toDate();
-        start.setHours(start.getHours() + settings.timezone.offset * -1); // fix for timezone issue
+        start.setHours(start.getHours() + 1 + settings.timezone.offset * -1); // fix for timezone issue
 
         const end = moment(
           `${currentDate} ${settings.autoClockEnd}`,
@@ -66,7 +66,7 @@ async function autoClockHomesUtility(verbose = true) {
         )
           // .tz("America/Chicago")
           .toDate();
-        end.setHours(end.getHours() + settings.timezone.offset * -1); // fix for timezone issue
+        end.setHours(end.getHours() + 1 + settings.timezone.offset * -1); // fix for timezone issue
 
         const data = {
           home: settings.home,
